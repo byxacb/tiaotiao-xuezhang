@@ -267,3 +267,5 @@
 - 第二次 Render 部署失败原因为 `express@5` 与 `path-to-regexp` 对 `app.get("*")` 的路由模式不兼容（报错 `Missing parameter name at index 1: *`）。
 - 已将生产静态兜底路由从 `app.get("*")` 改为 `app.use((_req, res) => res.sendFile(...))`，避免通配符解析异常。
 - 本地再次验证：`typecheck`、`build`、`test` 全通过，准备重新部署。
+- 第三次联调发现生产兜底路由位置错误：`app.use` 放在 API 路由前导致 `/api/*` 全部返回 `index.html`。
+- 已将兜底路由移动到所有 API 与错误处理中间件之后，确保 API 正常响应，前端 SPA 仍可刷新直达。

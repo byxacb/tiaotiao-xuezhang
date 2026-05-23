@@ -24,9 +24,6 @@ const isProduction = process.env.NODE_ENV === "production";
 if (isProduction) {
   const distPath = path.resolve(__dirname, "../dist");
   app.use(express.static(distPath));
-  app.use((_req, res) => {
-    res.sendFile(path.join(distPath, "index.html"));
-  });
 }
 
 app.get("/api/health", (_req, res) => {
@@ -187,6 +184,13 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
     source: "server"
   });
 });
+
+if (isProduction) {
+  const distPath = path.resolve(__dirname, "../dist");
+  app.use((_req, res) => {
+    res.sendFile(path.join(distPath, "index.html"));
+  });
+}
 
 app.listen(port, () => {
   console.log(`Tiaotiao API listening on http://localhost:${port}`);
