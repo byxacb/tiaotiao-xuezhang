@@ -261,3 +261,9 @@
 
 - 需要将本次修复提交并推送到 `main` 后再次触发 Render 部署，确认 `live` 状态与线上健康检查 200。
 - 如用户后续要绑定自定义新加坡域名（非 `onrender.com`），需再配置 Render Custom Domain 与 DNS 解析。
+
+### 追加排障（同日）
+
+- 第二次 Render 部署失败原因为 `express@5` 与 `path-to-regexp` 对 `app.get("*")` 的路由模式不兼容（报错 `Missing parameter name at index 1: *`）。
+- 已将生产静态兜底路由从 `app.get("*")` 改为 `app.use((_req, res) => res.sendFile(...))`，避免通配符解析异常。
+- 本地再次验证：`typecheck`、`build`、`test` 全通过，准备重新部署。
