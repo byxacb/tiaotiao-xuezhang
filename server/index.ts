@@ -1,4 +1,5 @@
 import cors from "cors";
+import path from "path";
 import dotenv from "dotenv";
 import express from "express";
 import { z } from "zod";
@@ -13,6 +14,16 @@ const ai = createAiService();
 
 app.use(cors({ origin: true }));
 app.use(express.json({ limit: "10mb" }));
+
+// Production: serve built frontend
+const isProduction = process.env.NODE_ENV === "production";
+if (isProduction) {
+  const distPath = path.resolve(__dirname, "../dist");
+  app.use(express.static(distPath));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(distPath, "index.html"));
+  });
+}
 
 app.get("/api/health", (_req, res) => {
   res.json({
