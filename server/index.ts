@@ -1,5 +1,6 @@
 import cors from "cors";
 import path from "path";
+import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import express from "express";
 import { z } from "zod";
@@ -7,6 +8,9 @@ import { createAiService } from "./services/aiService";
 
 dotenv.config({ path: ".env.local" });
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = Number(process.env.PORT ?? 8787);

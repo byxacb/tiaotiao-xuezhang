@@ -225,3 +225,39 @@
 - `npm run test`：通过。
 - `npm run build`：通过。
 - 真实 API 测试："世界上最大的海洋是什么？" → 绘本图 + 真实照片均成功生成（`source: "ark"`）。
+
+## 2026-05-23 Render 新加坡部署上线
+
+### 用户原始需求
+
+用户要求将项目部署上线，使用新加坡可访问地址，确保中国大陆用户可访问；并要求把环境变量一并配置到线上，保证网站所有功能可正常使用。
+
+### 处理过程
+
+- 按项目规则完成会话启动检查：读取 `AGENTS.md`、`MEMORY.md`、`对话.md`，确认 `HANDOFF.md` 不存在，并检查最近提交。
+- 安装 Render CLI（`render v2.18.0`），使用用户提供的 Render API Key 完成鉴权并切换到工作区 `My Workspace`。
+- 确认线上已存在新加坡区域 Web Service：`srv-d88qukgjo6nc73d7lgu0`，URL 为 `https://tiaotiao-xuezhang.onrender.com`，`region=singapore`。
+- 通过 Render API 将 `.env.local` 中关键变量写入服务环境变量：`AI_PROVIDER_MODE`、`TTS_PROVIDER`、`MINIMAX_API_KEY`、`MINIMAX_BASE_URL`、`MINIMAX_CHAT_MODEL`、`ARK_API_KEY`、`ARK_IMAGE_MODEL`。
+- 首次重新部署失败，日志显示 `ReferenceError: __dirname is not defined in ES module scope`（`server/index.ts`）。
+- 修复方式：在 `server/index.ts` 中用 `fileURLToPath(import.meta.url)` + `path.dirname` 显式构造 ESM 环境下的 `__dirname`。
+
+### 技术决策
+
+- 保持 Render 新加坡区域不变，以降低中国大陆访问跨境延迟与失败概率。
+- 环境变量通过 Render 服务级 API 设置，不写入仓库，继续遵守密钥不入库原则。
+- 生产故障修复优先保证兼容性：避免在 ESM 中直接使用 CJS 的 `__dirname`。
+
+### 验证步骤
+
+- 本地验证全部通过：
+  - `npm run typecheck`：通过
+  - `npm run lint`：通过
+  - `npm run test`：通过（2/2）
+  - `npm run build`：通过
+  - `npm run scan:secrets`：通过
+- Render 构建日志确认根因与修复点匹配：修复前为 `__dirname` 未定义。
+
+### 遗留问题
+
+- 需要将本次修复提交并推送到 `main` 后再次触发 Render 部署，确认 `live` 状态与线上健康检查 200。
+- 如用户后续要绑定自定义新加坡域名（非 `onrender.com`），需再配置 Render Custom Domain 与 DNS 解析。
